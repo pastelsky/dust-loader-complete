@@ -1,7 +1,7 @@
 {
-  "name": "dust-loader-safe",
+  "name": "dust-loader-complete",
   "version": "1.0.0",
-  "description": "Webpack loader for DustJS files",
+  "description": "Webpack loader for DustJS template files",
   "main": "index.js",
   "scripts": {
     "test": "istanbul cover ./node_modules/mocha/bin/_mocha -- test/*.test.js"
