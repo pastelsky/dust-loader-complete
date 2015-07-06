@@ -3,14 +3,18 @@
 var fs = require('fs');
 var path = require('path');
 var assign = require('object-assign');
-var expect = require('expect.js');
 var mkdirp = require('mkdirp');
 var rimraf = require('rimraf');
 var webpack = require('webpack');
 
+var assert = require('chai').assert;
+var expect = require('chai').expect;
+
 describe('dust-loader-safe', function() {
 
-  var outputDir = path.resolve(__dirname, './output/loader');
+  var outputDir = path.resolve(__dirname, './output');
+  var outputFile = 'pack_to_test.js';
+  var outputPath = path.join(outputDir, outputFile);
   var dustLoader = path.resolve(__dirname, '../');
   
   var globalConfig = {
@@ -25,7 +29,7 @@ describe('dust-loader-safe', function() {
     },
     output: {
       path: outputDir,
-      filename: '[id].loader.js',
+      filename: outputFile,
     },
     module: {
       loaders: [
@@ -38,34 +42,43 @@ describe('dust-loader-safe', function() {
       ]
     }
   };
-  
-  console.log( globalConfig.resolve.root );
-  
+    
   function checkOutputFile(outputDir, done) {
      fs.readdir(outputDir, function(err, files) {
-        expect(err).to.be(null);
-        expect(files.length).to.equal(1);
+        // check for errors
+        expect( err ).to.be.null;
+        
+        // make sure a file was generated
+        expect(files.length).to.be.above(0);
                 
         fs.readFile(path.resolve(outputDir, files[0]), function(err, data) {
-          expect(err).to.be(null);
+          // check for errors
+          expect( err ).to.be.null;
+          
+          // convert data to string
           var str = data.toString();
           
-          expect(str.indexOf('Cannot find module')).to.be(-1);
+          // make sure packed file includes the register function for the partials
+          assert.isAbove( str.indexOf( 'dust.register("dust\\/master"' ), -1, "dust/master is included in packed file" );
+          assert.isAbove( str.indexOf( 'dust.register("dust\\/include"' ), -1, "dust/include is included in packed file" );
+          
+          // make sure packed file doesn't include the phrase "Cannot find module"
+          assert.isBelow( str.indexOf( 'Cannot find module' ), 0, "All partials were found" );          
           
           return done();
         });
       });
   }
 
-  // Clean generated cache files before each test
-  // so that we can call each test with an empty state.
-  beforeEach(function(done) {
-    rimraf(outputDir, function(err) {
+  // Remove test file after each test
+  afterEach(function(done) {
+    rimraf(outputPath, function(err) {
       if (err) { return done(err); }
-      mkdirp(outputDir, done);
+      else { return done(); }
     });
   });
   
+  // Remove output directory after all tests are done
   after( function( done ) {
     rimraf( outputDir, function(err) {
       if (err) { return done(err); }
@@ -79,8 +92,8 @@ describe('dust-loader-safe', function() {
         entry: './test/fixtures/relative.js'
       } );
   
-      webpack(config, function(err, stats) {
-        expect(err).to.be(null);
+      webpack( config, function(err, stats ) {
+        expect( err ).to.be.null;
         checkOutputFile( outputDir, done );
       });
     });
@@ -90,11 +103,22 @@ describe('dust-loader-safe', function() {
         entry: './test/fixtures/absolute.js'
       } );
   
-      webpack(config, function(err, stats) {
-        expect(err).to.be(null);
+      webpack( config, function( err, stats ) {
+        expect( err ).to.be.null;
         checkOutputFile( outputDir, done );
       });
     });
+    
+    it( 'should allow a space in between the partial opening tag and the partial name', function( done ) {
+      var config = assign( {}, globalConfig, {
+        entry: './test/fixtures/space.js'
+      } );
+  
+      webpack( config, function( err, stats ) {
+        expect( err ).to.be.null;
+        checkOutputFile( outputDir, done );
+      } );
+    } );
     
   } );
   

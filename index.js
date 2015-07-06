@@ -25,8 +25,6 @@ module.exports = function( content ) {
   var loader_options = loaderUtils.parseQuery(this.query);
   var options = assign({}, default_options, global_options, loader_options);
   
-
-  
   // Fix slashes & resolve root
   options.root = path.resolve( options.root.replace( '/', path.sep ) );
  
@@ -40,7 +38,7 @@ module.exports = function( content ) {
   var template = dust.compile( content, name ); 
   
   // Find any referenced templates & add them to a list of dependencies
-  var reg = /{>"?([\w\.\/\-_]+)"? ?\/}/g,
+  var reg = /{>\s?"?([\w\.\/\-_]+)"? ?\/}/g,
   	result = null,
 	  deps = [];
 		
