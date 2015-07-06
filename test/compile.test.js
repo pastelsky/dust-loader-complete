@@ -51,7 +51,7 @@ describe('dust-loader-safe', function() {
         // make sure a file was generated
         expect(files.length).to.be.above(0);
                 
-        fs.readFile(path.resolve(outputDir, files[0]), function(err, data) {
+        fs.readFile(outputPath, function(err, data) {
           // check for errors
           expect( err ).to.be.null;
           
@@ -71,7 +71,7 @@ describe('dust-loader-safe', function() {
   }
 
   // Remove test file after each test
-  afterEach(function(done) {
+  beforeEach(function(done) {
     rimraf(outputPath, function(err) {
       if (err) { return done(err); }
       else { return done(); }
