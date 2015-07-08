@@ -47,7 +47,7 @@ module.exports = function( content ) {
   }
   
   // Return the code needed to run this template
-  return "var dust = require('" + options.dustAlias + "'); "
+  return "var dust = require('" + options.dustAlias + "/lib/dust'); "
   		 + deps.join( ' ' )
          + template
          + "module.exports = function ( context, callback ) { dust.render( '" + name + "', context, callback ); };";
