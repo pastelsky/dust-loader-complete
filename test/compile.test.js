@@ -86,7 +86,21 @@ describe('dust-loader-safe', function() {
     } );
   } );
   
+  describe( 'when requiring a dust template from JavaScript', function() {
+     it( 'should allow requiring templates via relative paths', function( done ) {
+      var config = assign( {}, globalConfig, {
+        entry: './test/fixtures/sibling/sibling.js'
+      } );
+  
+      webpack( config, function( err, stats ) {
+        expect( err ).to.be.null;
+        checkOutputFile( outputDir, done );
+      } );
+    } );
+  } );
+  
   describe( 'when compiling a dust template', function() {
+    
     it( 'should require any relatively-pathed partials', function( done ) {
       var config = assign( {}, globalConfig, {
         entry: './test/fixtures/relative.js'
@@ -119,6 +133,8 @@ describe('dust-loader-safe', function() {
         checkOutputFile( outputDir, done );
       } );
     } );
+    
+   
     
   } );
   
