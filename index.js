@@ -11,6 +11,11 @@ function defaultNamingFunction( template_path, options, content ) {
 			.split( path.sep ).join( '/' );	 // split at path separator and replace with a forward slash			
 }
 
+// Create a wrapper function for calling dust.render
+function defaultWrapperGenerator( name ) {
+  return "function( context, callback ) { dust.render( '" + name + "', context, callback ); }"
+}
+
 // Export actual loader method
 module.exports = function( content ) {
   if (this.cacheable) { this.cacheable(); }
@@ -19,9 +24,10 @@ module.exports = function( content ) {
   var default_options = {
 	 root: '',
    dustAlias: 'dustjs',
-	 namingFn: defaultNamingFunction
+	 namingFn: defaultNamingFunction,
+   wrapperGenerator: defaultWrapperGenerator
   };
-  var global_options = this.options['dust-loader-safe'];
+  var global_options = this.options['dust-loader-complete'];
   var loader_options = loaderUtils.parseQuery(this.query);
   var options = assign({}, default_options, global_options, loader_options);
   
@@ -50,5 +56,5 @@ module.exports = function( content ) {
   return "var dust = require('" + options.dustAlias + "/lib/dust'); "
   		 + deps.join( ' ' )
          + template
-         + "module.exports = function ( context, callback ) { dust.render( '" + name + "', context, callback ); };";
+         + "module.exports = " + options.wrapperGenerator( name );
 };
