@@ -24,3 +24,30 @@ Second, provide an alias for the `dustjs-linkedin` module. dust-loader-complete 
         dustjs: 'dustjs-linkedin'
     }
 ```
+
+## Options
+dust-loader-complete offers several options to customize its behavior. Read the [loader documentation](http://webpack.github.io/docs/loaders.html) to learn more about how to set loader options.
+
+### root
+Set a root path for your dust templates. This root will be removed from the beginning of the dust module path before it is turned into the template name via the `namingFn`.
+
+### dustAlias
+Customize the alias used for DustJS. Must match the alias set in the webpack configuration.
+
+### wrapperGenerator
+This option must be set via the "global" configuration object. What this means is that in your webpack configuration object, create a top-level object with the name `dust-loader-complete':
+```javascript
+    {
+        entry: '/path/to/entry.js',
+        ....
+        'dust-loader-complete': {
+            wrapperGenerator: function ( name ) { .... }
+        }
+    }
+```
+This function generates the `dust.render` wrapper function. It _receives_ a single parameter, the template name as a string, and it must return a string that when written out to the webpack JavaScript file will render the dust template. For example, the default function is
+```javascript
+    function defaultWrapperGenerator( name ) {
+      return "function( context, callback ) { dust.render( '" + name + "', context, callback ); }";
+    }
+```
