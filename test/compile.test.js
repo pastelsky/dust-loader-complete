@@ -138,6 +138,17 @@ describe('dust-loader-complete', function() {
         checkOutputFile( outputDir, done );
       } );
     } );
+
+    it( 'should allow parameters to be passed in to the partial', function( done ) {
+      var config = assign( {}, globalConfig, {
+        entry: './test/fixtures/parameters.js'
+      } );
+
+      webpack( config, function( err, stats ) {
+        expect( err ).to.be.null;
+        checkOutputFile( outputDir, done );
+      } );
+    } );
   
   } );
   
