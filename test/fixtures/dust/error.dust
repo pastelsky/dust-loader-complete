@@ -1,0 +1,11 @@
+{>"dust/{master}" /}
+
+{<headContent}
+	<script>
+		window.alert('loading');
+	</script>
+{/headContent}
+
+{<bodyContent}
+	{>"dust/include" /}
+{/bodyContent}
