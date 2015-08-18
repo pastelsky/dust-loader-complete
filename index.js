@@ -53,24 +53,30 @@ module.exports = function( content ) {
   }
 
   //a regex to see if there are any {! require("DUST_FILE") !} comments to also require
-  var reg2 = /{! require\("([\w\.\/\-_\|[\]]+)\"\) !}/g,
-    reg3 = /\[([^\]]*)\]/g,
-    result2;
+  var require_reg = /{! require\("([\w\.\/\-_\|[\]]+)\"\) !}/g;
+
+  //a regex to check if there are any brackets in the require statment like patterns/atoms/[button|button_link]
+  var bracket_reg = /\[([^\]]*)\]/g;
+
+  //variables to hold the results from the require regex and the bracket regex
+  var require_result, bracket_result;
+
   //if there is a require comment, parse it out even further
-  while ( (result = reg2.exec( content ) ) !== null ) {
+  while ( (require_result = require_reg.exec( content ) ) !== null ) {
     //this will check if there are any comments that have a | delimited list of files, such as {! require("patterns/atoms/[button|button_link]") !}
-    result2 = reg3.exec(result[1]);
-    //if there is a result, split the files by | and include them all
-    if(result2) {
-      var parts = result2[1].split("|");
+    bracket_result = bracket_reg.exec(require_result[1]);
+
+    //if there is a require_result, split the files by | and include them all
+    if(bracket_result) {
+      var parts = bracket_result[1].split("|");
       for(var i = 0; i < parts.length; i++) {
-        var output = result[1].replace(reg3, parts[i]);
+        var output = require_result[1].replace(bracket_reg, parts[i]);
         deps.push( "var partial" + deps.length + " = require('" + output + "');" );
       }
     }
-    //if there isn't a result, assume it was just a normal require like {! require("patterns/atoms/button") !}
+    //if there isn't a require_result, assume it was just a normal require like {! require("patterns/atoms/button") !}
     else {
-      deps.push( "var partial" + deps.length + " = require('" + result[1] + "');" );
+      deps.push( "var partial" + deps.length + " = require('" + require_result[1] + "');" );
     }
   }
 
