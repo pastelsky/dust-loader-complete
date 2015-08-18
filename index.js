@@ -44,7 +44,7 @@ module.exports = function( content ) {
   var template = dust.compile( content, name ); 
   
   // Find any referenced templates & add them to a list of dependencies
-  var reg = /{>\s?"?([\w\.\/\-_]+)"?.*\/}/g,
+  var reg = /{>\s?"?([\w\.\/\-_]+)"?( .*\/}|\/})/g,
   	result = null,
 	  deps = [];
 		
