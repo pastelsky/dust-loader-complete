@@ -44,14 +44,43 @@ module.exports = function( content ) {
   var template = dust.compile( content, name ); 
   
   // Find any referenced templates & add them to a list of dependencies
-  var reg = /{>\s?"?([\w\.\/\-_]+)"?.*\/}/g,
+  var reg = /{>\s?"?([\w\.\/\-_]+)"?( .*\/}|\/})/g,
   	result = null,
 	  deps = [];
 		
   while ( (result = reg.exec( content ) ) !== null ) {
 	  deps.push( "var partial" + deps.length + " = require('" + result[1] + "');" );
   }
-  
+
+  //a regex to see if there are any {! require("DUST_FILE") !} comments to also require
+  var require_reg = /{! require\("([\w\.\/\-_\|[\]]+)\"\) !}/g;
+
+  //a regex to check if there are any brackets in the require statment like patterns/atoms/[button|button_link]
+  var bracket_reg = /\[([^\]]*)\]/g;
+
+  //variables to hold the results from the require regex and the bracket regex
+  var require_result, bracket_result;
+
+  //if there is a require comment, parse it out even further
+  while ( (require_result = require_reg.exec( content ) ) !== null ) {
+    //this will check if there are any comments that have a | delimited list of files, such as {! require("patterns/atoms/[button|button_link]") !}
+    bracket_result = bracket_reg.exec(require_result[1]);
+
+    //if there is a require_result, split the files by | and include them all
+    if(bracket_result) {
+      var parts = bracket_result[1].split("|");
+      for(var i = 0; i < parts.length; i++) {
+        var output = require_result[1].replace(bracket_reg, parts[i]);
+        deps.push( "var partial" + deps.length + " = require('" + output + "');" );
+      }
+    }
+    //if there isn't a require_result, assume it was just a normal require like {! require("patterns/atoms/button") !}
+    else {
+      deps.push( "var partial" + deps.length + " = require('" + require_result[1] + "');" );
+    }
+  }
+
+
   // Return the code needed to run this template
   return "var dust = require('" + options.dustAlias + "/lib/dust'); "
   		 + deps.join( ' ' )

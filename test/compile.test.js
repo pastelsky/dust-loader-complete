@@ -149,7 +149,62 @@ describe('dust-loader-complete', function() {
         checkOutputFile( outputDir, done );
       } );
     } );
-  
+
+    it( 'should not require any partials that have a dust variable in its name', function( done ) {
+      var config = assign( {}, globalConfig, {
+        entry: './test/fixtures/error.js'
+      } );
+
+      webpack( config, function( err, stats ) {
+        expect( err ).to.be.null;
+
+        //rewrite the checkOutputFile above so that it makes sure no dust files get registered
+        fs.readdir(outputDir, function(err, files) {
+          // check for errors
+          expect( err ).to.be.null;
+
+          // make sure a file was generated
+          expect(files.length).to.be.above(0);
+
+          fs.readFile(outputPath, function(err, data) {
+            // check for errors
+            expect( err ).to.be.null;
+            var str = data.toString();
+            // make sure packed file includes the register function for the partials
+            assert.equal( str.indexOf( 'dust.register("dust\\/master"' ), -1, "dust/master is not included in packed file" );
+            assert.isAbove( str.indexOf( 'dust.register("dust\\/error"' ), -1, "dust/error is included in packed file" );
+
+            return done();
+          });
+        });
+      } );
+    } );
+
+    describe("{! require !} comments", function() {
+
+      it( 'should require files written in this form: {! require("./master") !}', function( done ) {
+        var config = assign( {}, globalConfig, {
+          entry: './test/fixtures/require1'
+        } );
+
+        webpack( config, function( err, stats ) {
+          expect( err ).to.be.null;
+          checkOutputFile( outputDir, done );
+        } );
+      });
+
+      it( 'should require all files written piped together in the form of: {! require("./[include|master]") !}', function( done ) {
+        var config = assign( {}, globalConfig, {
+          entry: './test/fixtures/require2'
+        } );
+
+        webpack( config, function( err, stats ) {
+          expect( err ).to.be.null;
+          checkOutputFile( outputDir, done );
+        } );
+      });
+    });
+
   } );
   
   
