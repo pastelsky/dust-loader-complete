@@ -1,11 +1,12 @@
-{>"dust/{master}" /}
+{>"layouts/master" title="Absolute" /}
 
 {<headContent}
 	<script>
 		window.alert('loading');
-	</script>
+	</script>	
 {/headContent}
 
 {<bodyContent}
-	{>"dust/include" /}
+	{> another /}
+	{> "partials/include" /}
 {/bodyContent}

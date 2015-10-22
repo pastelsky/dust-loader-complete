@@ -1,0 +1,12 @@
+{> "layouts/master" title="Comments" /}
+
+{<headContent}
+	<script>
+		window.alert('loading');
+	</script>	
+{/headContent}
+
+{<bodyContent}
+	{! require("multi/[require0|require1]") !} 
+	{> "multi/require{num}" /}
+{/bodyContent}
