@@ -1,0 +1,8 @@
+{! variations on partial syntax !}
+{>"partials/syntax"/}
+{> "partials/syntax" /}
+{>"partials/syntax" num="1"/}
+{> "partials/syntax" num="2" /}
+{> "partials/syntax"
+	num="3"
+/}

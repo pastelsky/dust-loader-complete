@@ -1,4 +1,4 @@
-{>"./master" /}
+{>"./layouts/master" title="Relative" /}
 
 {<headContent}
 	<script>
@@ -7,5 +7,5 @@
 {/headContent}
 
 {<bodyContent}
-	{>"./include" /}
+	{> "./partials/hello" /}
 {/bodyContent}
