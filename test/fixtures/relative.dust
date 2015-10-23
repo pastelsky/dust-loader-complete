@@ -7,6 +7,5 @@
 {/headContent}
 
 {<bodyContent}
-	{> another /}
-	{> "./partials/include" /}
+	{> "./partials/hello" /}
 {/bodyContent}

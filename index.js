@@ -11,10 +11,11 @@ function loader( source ) {
   
   // Set up default options & override them with other options
   var default_options = {
-	 root: '',
-   dustAlias: 'dustjs',
-	 namingFn: defaultNamingFunction,
-   wrapperGenerator: defaultWrapperGenerator
+    root: '',
+    dustAlias: 'dustjs',
+	  namingFn: defaultNamingFunction,
+    wrapperGenerator: defaultWrapperGenerator,
+    verbose: false
   };
   var global_options = this.options['dust-loader-complete'];
   var loader_options = loaderUtils.parseQuery(this.query);
@@ -28,6 +29,9 @@ function loader( source ) {
   
   // Create the template name
   var name = options.namingFn( template_path, options );
+  
+  // Log
+  log( options, 'Loading DustJS module from "' + template_path + '": naming template "' + name + '"' );
   
   // Find different styles of dependencies
   var deps = [];
@@ -63,24 +67,33 @@ function defaultWrapperGenerator( name ) {
 
 // Find DustJS partials
 function findPartials( source, source_path, options, deps ) {
-  var reg = /({>\s?"?)([\w\.\/\-_]+)("? .*\/}|\/})/g, // matches dust partial syntax
-    result = null,
+  var reg = /({>\s?")([^"{}]+)("[\s\S]*?\/})/g, // matches dust partial syntax
+    result = null, partial,
     dep, name, replace;
     
   // search source & add a dependency for each match
   while ( (result = reg.exec( source ) ) !== null ) {
+    partial = {
+      prefix: result[1],
+      name: result[2],
+      suffix: result[3]
+    };
     
     // add to dependencies
-    name = addDustDependency( result[2], source_path, options, deps );
+    name = addDustDependency( partial.name, source_path, options, deps );
     
     // retrieve newest dependency
     dep = deps[deps.length - 1];
     
+    // log
+    log( options, 'found partial dependency "' + partial.name + '"' );
+    
     // if the partial has been renamed, update the name in the template
-    if (name != result[2]) {
-      console.log( 'RENAMING ' + result[2] + ' to ' + name );
+    if (name != partial.name) {
+      log( options, 'renaming partial "' + partial.name + '" to "' + name + '"' )
+      
       // build replacement for partial tag
-      replace = result[1] + name + result[3];
+      replace = partial.prefix + name + partial.suffix;
       
       // replace the original partial path with the new "absolute" path (relative to root)
       source = source.substring( 0, result.index ) + replace + source.substring( result.index + result[0].length );
@@ -97,7 +110,7 @@ function findPartials( source, source_path, options, deps ) {
 function findRequireComments( source, source_path, options, deps ) {
   var comment_reg = /{! require\("([\w\.\/\-_\|[\]]+)\"\) !}/g, // matches proprietary comment syntax for requiring multiple partials
     bracket_reg = /\[([^\]]*)\]/g,                            // matches brackets inside the comment requiring
-    result = null, bracket_result = null, alt;
+    result = null, bracket_result = null, alt, name;
   
   // search source for require comments
   while ( (result = comment_reg.exec( source ) ) !== null ) {
@@ -108,12 +121,16 @@ function findRequireComments( source, source_path, options, deps ) {
     if( bracket_result ) {
       alt = bracket_result[1].split("|");
       for(var i = 0; i < alt.length; i++) {
+        name = result[1].replace( bracket_reg, alt[i] );
+        log( options, 'found comment dependency "' + name + '"' );
+        
         // add a dust dependency for each alternative name
-        addDustDependency( result[1].replace( bracket_reg, alt[i] ), source_path, options, deps );
+        addDustDependency( name, source_path, options, deps );
       }
     }
     //if there isn't a result, assume it was just a normal require like {! require("patterns/atoms/button") !}
     else {
+      log( options, 'found comment dependency "' + result[1] + '"' );
       addDustDependency( result[1], source_path, options, deps );
     }
   }  
@@ -147,6 +164,13 @@ function determinePartialName( partial_path, source_path, options ) {
   
   // now use the naming function to get the name
   return options.namingFn( abs, options );
+}
+
+// Log only if verbose mode is on
+function log( options, message ) {
+  if (options.verbose) {
+    console.log( '[dust-loader-complete]: ', message );
+  }
 }
 
 // Export actual loader method

@@ -15,7 +15,7 @@ module.exports = {
           test: /\.dust$/,
           loader: dustLoader,
           exclude: /node_modules/,
-          query: { root: "test/fixtures" }
+          query: { root: "test/fixtures", verbose: true }
         }
       ]
     }
