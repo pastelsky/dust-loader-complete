@@ -5,7 +5,7 @@ var variable = require( 'variable' );
 
 
 describe("dust-loader-complete", function( ) {
-    it( 'should allow dust to find the required template by name', function( done ) {
+    it( 'registers the template by name on the dust global template cache', function( done ) {
         dust.render( 'simple', {}, function( err, out ) {
             expect( err ).to.be.null;
             expect( out ).to.equal( 'Hello, world!' );
@@ -13,7 +13,7 @@ describe("dust-loader-complete", function( ) {
         } );
     });
     
-    it( 'should render the template by calling the returned function', function( done ) {
+    it( 'returns a function that when executed renders the template', function( done ) {
         simple( {}, function( err, out ) {
             expect( err ).to.be.null;
             expect( out ).to.equal( 'Hello, world!' );
@@ -21,11 +21,15 @@ describe("dust-loader-complete", function( ) {
         } );
     } );
     
-    it( 'should not attempt to pack or compile any partial with a dust variable in its name', function( done ) {
+    it( 'ignores partial tags with Dust variables in their names', function( done ) {
         dust.render( 'multi/require{num}', {}, function( err, out ) {
             expect( err ).to.not.be.null;
             done();
         } );
+    } );
+    
+    it( 'sets the registered name of the template on the returned function', function( ) {
+        expect( simple.templateName ).to.equal( 'simple' );
     } );
     
 });

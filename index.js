@@ -47,9 +47,11 @@ function loader( source ) {
 
   // Return the code needed to run this template
   return "var dust = require('" + options.dustAlias + "/lib/dust'); "
-  		 + deps.join( ' ' )
-         + template
-         + "module.exports = " + options.wrapperGenerator( name );
+      + deps.join( ' ' )
+      + template
+      + "var fn = " + options.wrapperGenerator( name )
+      + '; fn.templateName = "' + name + '"; '
+      + "module.exports = fn;";
 }
 
 

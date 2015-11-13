@@ -6,6 +6,9 @@ dust-loader-complete is a webpack loader for DustJS files that compiles DustJS t
 1. Instead of returning the template function itself, it returns a wrapper function that can be called directly.
 2. It automatically finds all partials and requires them, which adds them into your webpack bundle.
 
+### Note
+* As of version 1.4.1, the returned wrapper function has a property `templateName` that holds the registered name of the template.
+
 ## Installation
 ```
     npm install --save-dev dust-loader-complete
