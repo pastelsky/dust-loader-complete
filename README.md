@@ -27,6 +27,14 @@ Second, provide an alias for the `dustjs-linkedin` module. dust-loader-complete 
         dustjs: 'dustjs-linkedin'
     }
 ```
+### Note
+If you want to use NPM's dustjs-helpers module, you'll have to add the following alias:
+```javascript
+    alias: {
+        ....
+        'dust.core': 'dustjs-linkedin'
+    }
+```
 
 ## Options
 dust-loader-complete offers several options to customize its behavior. Read the [loader documentation](http://webpack.github.io/docs/loaders.html) to learn more about how to set loader options.
